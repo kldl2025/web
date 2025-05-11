@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบฝาก-ถอนเงินนักเรียน</title>
+
+  <!-- ใช้ฟอนต์ Noto Sans จาก Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.0/dist/sweetalert2.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    /* เริ่มต้นสไตล์ */
+    body {
+      font-family: 'Noto Sans', sans-serif; /* ใช้ฟอนต์ Noto Sans */
+      background-color: #f0f8ff; /* ฟ้าสดใส */
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff; /* สีขาว */
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #0099cc; /* สีฟ้า */
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    .form-group input:focus {
+      border-color: #0099cc; /* สีฟ้า */
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0099cc; /* สีฟ้า */
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0077b3; /* สีฟ้าเข้ม */
+    }
+
+    button:disabled {
+      background-color: #c0c0c0;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .overlay .spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #0099cc;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* Media Queries สำหรับมือถือและแท็บเล็ต */
+    @media (max-width: 768px) {
+      .container {
+        width: 95%;
+        padding: 15px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      .form-group input {
+        font-size: 16px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        width: 100%;
+        padding: 10px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .form-group input {
+        font-size: 14px;
+      }
+
+      button {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ระบบฝาก-ถอนเงินนักเรียน</h2>
+    <div class="form-group">
+      <label for="studentName">ชื่อ-นามสกุล:</label>
+      <input type="text" id="studentName" placeholder="ชื่อ-นามสกุล" required>
+    </div>
+    <div class="form-group">
+      <label for="studentEmail">อีเมล:</label>
+      <input type="email" id="studentEmail" placeholder="อีเมล" required>
+    </div>
+    <div class="form-group">
+      <label for="studentPhone">เบอร์โทรศัพท์:</label>
+      <input type="text" id="studentPhone" placeholder="เบอร์โทรศัพท์" required>
+    </div>
+    <button id="saveStudent">บันทึกข้อมูลนักเรียน</button>
+  </div>
+
+  <div class="overlay">
+    <div class="spinner">กำลังบันทึกข้อมูล...</div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      $("#saveStudent").click(function() {
+        const studentName = $("#studentName").val();
+        const studentEmail = $("#studentEmail").val();
+        const studentPhone = $("#studentPhone").val();
+
+        if (studentName && studentEmail && studentPhone) {
+          $(".overlay").show();
+          
+          const studentData = {
+            name: studentName,
+            email: studentEmail,
+            phone: studentPhone
+          };
+
+          fetch("https://script.google.com/macros/s/xxx/exec", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(studentData)
+          })
+          .then(response => response.json())
+          .then(data => {
+            $(".overlay").hide();
+            if (data.status === "success") {
+              Swal.fire("สำเร็จ!", "ข้อมูลถูกบันทึกเรียบร้อยแล้ว!", "success");
+            } else {
+              Swal.fire("ผิดพลาด!", "ไม่สามารถบันทึกข้อมูลได้", "error");
+            }
+          })
+          .catch(error => {
+            $(".overlay").hide();
+            Swal.fire("ผิดพลาด!", "เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
+          });
+        } else {
+          Swal.fire("ข้อมูลไม่ครบ!", "กรุณากรอกข้อมูลให้ครบถ้วน", "warning");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
