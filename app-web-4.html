@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟอร์มลงทะเบียน</title>
+    <!-- เพิ่ม Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">ฟอร์มลงทะเบียนผู้ใช้</h1>
+        <form id="registrationForm">
+            <div class="mb-4">
+                <label for="firstName" class="block text-sm font-semibold text-gray-700">ชื่อ:</label>
+                <input type="text" id="firstName" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="lastName" class="block text-sm font-semibold text-gray-700">สกุล:</label>
+                <input type="text" id="lastName" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="username" class="block text-sm font-semibold text-gray-700">ชื่อผู้ใช้:</label>
+                <input type="text" id="username" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-semibold text-gray-700">รหัสผ่าน:</label>
+                <input type="password" id="password" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="profilePicture" class="block text-sm font-semibold text-gray-700">รูปโปรไฟล์:</label>
+                <input type="file" id="profilePicture" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">ลงทะเบียน</button>
+        </form>
+
+        <p id="status" class="mt-4 text-center text-sm text-gray-600"></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let firstName = document.getElementById('firstName').value;
+            let lastName = document.getElementById('lastName').value;
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
+            let fileInput = document.getElementById('profilePicture');
+
+            if (fileInput.files && fileInput.files[0]) {
+                let file = fileInput.files[0];
+                let reader = new FileReader();
+
+                reader.onloadend = function () {
+                    let base64String = reader.result.split(',')[1]; // Extract base64 string
+                    let mimeType = file.type;
+                    let fileName = file.name;
+
+                    // Update status
+                    document.getElementById('status').innerText = 'กำลังส่งข้อมูล...';
+
+                    // Create URLSearchParams for sending data
+                    let params = new URLSearchParams();
+                    params.append('firstName', firstName);
+                    params.append('lastName', lastName);
+                    params.append('username', username);
+                    params.append('password', password);
+                    params.append('profilePicture', base64String);
+                    params.append('fileName', fileName);
+                    params.append('mimeType', mimeType);
+
+                    // Send data to Apps Script
+                    fetch('https://script.google.com/macros/s/AKfycbwnl8gjTc3axUcxzzJNXYsHQ_tLlUaCwqCcuc3vxYpt5Rs5jHlefRGHP2QBWiXB0G5Y/exec', {
+                        method: 'POST',
+                        body: params,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            document.getElementById('status').innerText = 'ลงทะเบียนสำเร็จ!';
+                        } else {
+                            document.getElementById('status').innerText = 'เกิดข้อผิดพลาด: ' + data.message;
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('status').innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+                    });
+                }
+
+                // Convert the file to base64
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
